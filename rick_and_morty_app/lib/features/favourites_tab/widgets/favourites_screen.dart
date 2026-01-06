@@ -1,54 +1,73 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
+import 'package:rick_and_morty_app/features/characters_tab/localStorage/storage.dart';
 import 'package:rick_and_morty_app/features/common_widgets/common_widgets.dart';
 import 'package:rick_and_morty_app/features/favourites_tab/models/favorites_sort_type.dart';
 
 class FavoritesScreen extends StatefulWidget {
   final ThemeNotifier themeNotifier;
 
-  const FavoritesScreen({super.key, required this.themeNotifier});
+  const FavoritesScreen({
+    super.key,
+    required this.themeNotifier,
+  });
 
   @override
   State<FavoritesScreen> createState() => _FavoritesScreenState();
 }
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
+  late final Box<CharacterHiveModel> _favoritesBox;
   FavoriteSortType _currentSort = FavoriteSortType.name;
-
-  late List<CharacterCardModel> _favorites;
 
   @override
   void initState() {
     super.initState();
-    _favorites = List.of(_mockFavorites);
-    _sortFavorites();
-  }
-
-  void _sortFavorites() {
-    switch (_currentSort) {
-      case FavoriteSortType.name:
-        _favorites.sort((a, b) => a.name.compareTo(b.name));
-        break;
-      case FavoriteSortType.status:
-        _favorites.sort((a, b) => a.status.compareTo(b.status));
-        break;
-    }
+    _favoritesBox = Hive.box<CharacterHiveModel>('favorites');
   }
 
   void _onSortChanged(FavoriteSortType sortType) {
-    setState(() {
-      _currentSort = sortType;
-      _sortFavorites();
-    });
+    setState(() => _currentSort = sortType);
+  }
+  
+  void _removeFromFavorites(CharacterCardModel character) {
+    CharacterHiveModel? hiveObject;
+
+    for (final item in _favoritesBox.values.whereType<CharacterHiveModel>()) {
+      if (item.name == character.name) {
+        hiveObject = item;
+        break;
+      }
+    }
+
+    if (hiveObject == null) return;
+
+    hiveObject.delete();
+    setState(() {});
   }
 
-  void _removeFromFavorites(CharacterCardModel character) {
-    setState(() {
-      _favorites.remove(character);
-    });
+  List<CharacterCardModel> _getSortedFavorites() {
+    final list = _favoritesBox.values
+        .whereType<CharacterHiveModel>()
+        .map((e) => e.toCardModel())
+        .toList();
+
+    switch (_currentSort) {
+      case FavoriteSortType.name:
+        list.sort((a, b) => a.name.compareTo(b.name));
+        break;
+      case FavoriteSortType.status:
+        list.sort((a, b) => a.status.compareTo(b.status));
+        break;
+    }
+
+    return list;
   }
 
   @override
   Widget build(BuildContext context) {
+    final favorites = _getSortedFavorites();
+
     return Scaffold(
       appBar: MainAppBar(
         title: 'Избранное',
@@ -71,36 +90,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       ),
       body: SafeArea(
         child: CharactersListView(
-          characters: _favorites,
-          favorites: _favorites.toSet(),
-          onFavoriteToggle: _removeFromFavorites,
+          characters: favorites,
+          onAction: _removeFromFavorites,
+          isRemovable: true,
           emptyText: 'Нет избранных персонажей',
         ),
       ),
     );
   }
 }
-
-final List<CharacterCardModel> _mockFavorites = [
-  CharacterCardModel(
-    imageUrl: 'https://rickandmortyapi.com/api/character/avatar/1.jpeg',
-    name: 'Rick Sanchez',
-    location: 'Earth',
-    status: 'Alive',
-    species: 'Human',
-  ),
-  CharacterCardModel(
-    imageUrl: 'https://rickandmortyapi.com/api/character/avatar/5.jpeg',
-    name: 'Jerry Smith',
-    location: 'Earth',
-    status: 'Alive',
-    species: 'Human',
-  ),
-  CharacterCardModel(
-    imageUrl: 'https://rickandmortyapi.com/api/character/avatar/8.jpeg',
-    name: 'Adjudicator Rick',
-    location: 'Citadel of Ricks',
-    status: 'Dead',
-    species: 'Human',
-  ),
-];

@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:hive/hive.dart';
+import 'package:rick_and_morty_app/features/characters_tab/localStorage/storage.dart';
 import 'package:rick_and_morty_app/features/characters_tab/network/characters_network.dart';
 import 'package:rick_and_morty_app/features/common_widgets/common_widgets.dart';
 
 class CharactersScreen extends StatefulWidget {
   final ThemeNotifier themeNotifier;
-  const CharactersScreen({super.key, required this.themeNotifier});
+
+  const CharactersScreen({
+    super.key,
+    required this.themeNotifier,
+  });
 
   @override
   State<CharactersScreen> createState() => _CharactersScreenState();
@@ -13,13 +19,15 @@ class CharactersScreen extends StatefulWidget {
 
 class _CharactersScreenState extends State<CharactersScreen> {
   List<CharacterCardModel> _characters = [];
-  final Set<CharacterCardModel> _favorites = {};
+  late final Box<CharacterHiveModel> _favoritesBox;
+
   bool _isLoading = true;
   String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
+    _favoritesBox = Hive.box<CharacterHiveModel>('favorites');
     _loadCharacters();
   }
 
@@ -34,32 +42,58 @@ class _CharactersScreenState extends State<CharactersScreen> {
       final networkData = await provider.fetchCharacters(page: 1);
 
       final uiData = networkData
-          .map((e) => CharacterCardModel(
-                imageUrl: e.imageUrl,
-                name: e.name,
-                location: e.location,
-                status: e.status,
-                species: e.species,
-              ))
+          .map(
+            (e) => CharacterCardModel(
+              imageUrl: e.imageUrl,
+              name: e.name,
+              location: e.location,
+              status: e.status,
+              species: e.species,
+            ),
+          )
           .toList();
 
-      setState(() => _characters = uiData);
+      setState(() {
+        _characters = uiData;
+      });
     } catch (e) {
-      setState(() => _errorMessage = 'Ошибка загрузки персонажей');
-      debugPrint('Ошибка: $e');
+      setState(() {
+        _errorMessage = 'Ошибка загрузки персонажей';
+      });
+      debugPrint('Ошибка загрузки персонажей: $e');
     } finally {
-      setState(() => _isLoading = false);
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
   void _toggleFavorite(CharacterCardModel character) {
-    setState(() {
-      if (_favorites.contains(character)) {
-        _favorites.remove(character);
-      } else {
-        _favorites.add(character);
+    CharacterHiveModel? existing;
+
+    for (final item in _favoritesBox.values.whereType<CharacterHiveModel>()) {
+      if (item.name == character.name) {
+        existing = item;
+        break;
       }
-    });
+    }
+
+    if (existing != null) {
+      existing.delete();
+    } else {
+      _favoritesBox.add(
+        CharacterHiveModel.fromCardModel(character),
+      );
+    }
+
+    setState(() {});
+  }
+
+  Set<CharacterCardModel> _favoriteCards() {
+    return _favoritesBox.values
+        .whereType<CharacterHiveModel>()
+        .map((e) => e.toCardModel())
+        .toSet();
   }
 
   @override
@@ -76,8 +110,8 @@ class _CharactersScreenState extends State<CharactersScreen> {
                 ? Center(child: Text(_errorMessage!))
                 : CharactersListView(
                     characters: _characters,
-                    favorites: _favorites,
-                    onFavoriteToggle: _toggleFavorite,
+                    favorites: _favoriteCards(),
+                    onAction: _toggleFavorite,
                   ),
       ),
     );

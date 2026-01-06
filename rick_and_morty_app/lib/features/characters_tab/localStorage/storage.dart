@@ -1,0 +1,1 @@
+export 'models/character_hive_model.dart';
