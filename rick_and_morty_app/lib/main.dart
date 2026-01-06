@@ -1,41 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:rick_and_morty_app/features/main_app_screen/view.dart';
-import 'package:rick_and_morty_app/theme.dart';
-import 'features/common_widgets/common_widgets.dart';
+import 'package:get_it/get_it.dart';
+import 'package:rick_and_morty_app/app.dart';
+import 'package:rick_and_morty_app/features/characters_tab/network/characters_network.dart';
 
 void main() {
-  runApp(const MyApp());
-}
+  final getIt = GetIt.instance;
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  getIt.registerLazySingleton<CharactersRepository>(() => CharactersRepository());
 
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
+  getIt.registerLazySingleton<AbstractCharactersProvider>(
+    () => CharactersProvider(getIt<CharactersRepository>()),
+  );
 
-class _MyAppState extends State<MyApp> {
-  late final ThemeNotifier themeNotifier;
-
-  @override
-  void initState() {
-    super.initState();
-    themeNotifier = ThemeNotifier(ThemeMode.light);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<ThemeMode>(
-      valueListenable: themeNotifier,
-      builder: (context, mode, _) {
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: mode,
-          home: MainAppScreen(themeNotifier: themeNotifier),
-        );
-      },
-    );
-  }
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  runApp(const RickAndMortyTestApp());
 }
