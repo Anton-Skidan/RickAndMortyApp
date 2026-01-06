@@ -13,6 +13,7 @@ class CharactersScreen extends StatefulWidget {
 
 class _CharactersScreenState extends State<CharactersScreen> {
   List<CharacterCardModel> _characters = [];
+  final Set<CharacterCardModel> _favorites = {};
   bool _isLoading = true;
   String? _errorMessage;
 
@@ -51,6 +52,16 @@ class _CharactersScreenState extends State<CharactersScreen> {
     }
   }
 
+  void _toggleFavorite(CharacterCardModel character) {
+    setState(() {
+      if (_favorites.contains(character)) {
+        _favorites.remove(character);
+      } else {
+        _favorites.add(character);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,7 +74,11 @@ class _CharactersScreenState extends State<CharactersScreen> {
             ? const Center(child: CircularProgressIndicator())
             : _errorMessage != null
                 ? Center(child: Text(_errorMessage!))
-                : CharactersListView(characters: _characters),
+                : CharactersListView(
+                    characters: _characters,
+                    favorites: _favorites,
+                    onFavoriteToggle: _toggleFavorite,
+                  ),
       ),
     );
   }

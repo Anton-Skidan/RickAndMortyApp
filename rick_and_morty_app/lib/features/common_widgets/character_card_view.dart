@@ -1,14 +1,37 @@
 import 'package:flutter/material.dart';
 import 'models/character_model.dart';
-import 'character_info_view.dart';
 
-class CharacterCard extends StatelessWidget {
+class CharacterCard extends StatefulWidget {
   final CharacterCardModel character;
+  final ValueChanged<CharacterCardModel>? onFavoriteToggle;
+  final bool isFavorite;
 
   const CharacterCard({
     super.key,
     required this.character,
+    this.onFavoriteToggle,
+    this.isFavorite = false,
   });
+
+  @override
+  State<CharacterCard> createState() => _CharacterCardState();
+}
+
+class _CharacterCardState extends State<CharacterCard> {
+  late bool _isFavorite;
+
+  @override
+  void initState() {
+    super.initState();
+    _isFavorite = widget.isFavorite;
+  }
+
+  void _toggleFavorite() {
+    setState(() => _isFavorite = !_isFavorite);
+    if (widget.onFavoriteToggle != null) {
+      widget.onFavoriteToggle!(widget.character);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,18 +39,16 @@ class CharacterCard extends StatelessWidget {
       height: 240,
       width: double.infinity,
       decoration: BoxDecoration(
-        border: Border.all(
-          width: 1,
-          color: Colors.grey.shade300,
-        ),
+        border: Border.all(width: 1, color: Colors.grey.shade300),
         borderRadius: BorderRadius.circular(12),
         image: DecorationImage(
-          image: NetworkImage(character.imageUrl),
+          image: NetworkImage(widget.character.imageUrl),
           fit: BoxFit.cover,
         ),
       ),
       child: Stack(
         children: [
+          // затемнение для текста
           Positioned.fill(
             child: DecoratedBox(
               decoration: BoxDecoration(
@@ -37,9 +58,22 @@ class CharacterCard extends StatelessWidget {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Colors.black.withOpacity(0.6),
+                    Colors.black.withValues(alpha: 0.6),
                   ],
                 ),
+              ),
+            ),
+          ),
+
+          Positioned(
+            top: 8,
+            left: 8,
+            child: GestureDetector(
+              onTap: _toggleFavorite,
+              child: Icon(
+                _isFavorite ? Icons.favorite : Icons.favorite_border,
+                color: Colors.redAccent,
+                size: 32,
               ),
             ),
           ),
@@ -52,20 +86,26 @@ class CharacterCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
               children: [
-                CharacterInfoView(
-                  text: character.name,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                Text(
+                  widget.character.name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 4),
-                CharacterInfoView(
-                  text: 'Локация: ${character.location}',
+                Text(
+                  'Локация: ${widget.character.location}',
+                  style: const TextStyle(color: Colors.white),
                 ),
-                CharacterInfoView(
-                  text: 'Статус: ${character.status}',
+                Text(
+                  'Статус: ${widget.character.status}',
+                  style: const TextStyle(color: Colors.white),
                 ),
-                CharacterInfoView(
-                  text: 'Тип: ${character.species}',
+                Text(
+                  'Тип: ${widget.character.species}',
+                  style: const TextStyle(color: Colors.white),
                 ),
               ],
             ),

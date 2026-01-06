@@ -41,6 +41,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     });
   }
 
+  void _removeFromFavorites(CharacterCardModel character) {
+    setState(() {
+      _favorites.remove(character);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,6 +72,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       body: SafeArea(
         child: CharactersListView(
           characters: _favorites,
+          favorites: _favorites.toSet(),
+          onFavoriteToggle: _removeFromFavorites,
           emptyText: 'Нет избранных персонажей',
         ),
       ),

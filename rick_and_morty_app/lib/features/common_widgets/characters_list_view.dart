@@ -4,20 +4,22 @@ import 'models/character_model.dart';
 
 class CharactersListView extends StatelessWidget {
   final List<CharacterCardModel> characters;
+  final Set<CharacterCardModel>? favorites;
+  final ValueChanged<CharacterCardModel>? onFavoriteToggle;
   final String emptyText;
 
   const CharactersListView({
     super.key,
     required this.characters,
+    this.favorites,
+    this.onFavoriteToggle,
     this.emptyText = 'Список пуст',
   });
 
   @override
   Widget build(BuildContext context) {
     if (characters.isEmpty) {
-      return Center(
-        child: Text(emptyText),
-      );
+      return Center(child: Text(emptyText));
     }
 
     return ListView.separated(
@@ -25,8 +27,13 @@ class CharactersListView extends StatelessWidget {
       itemCount: characters.length,
       separatorBuilder: (_, __) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
+        final character = characters[index];
+        final isFav = favorites?.contains(character) ?? false;
+
         return CharacterCard(
-          character: characters[index],
+          character: character,
+          isFavorite: isFav,
+          onFavoriteToggle: onFavoriteToggle,
         );
       },
     );
