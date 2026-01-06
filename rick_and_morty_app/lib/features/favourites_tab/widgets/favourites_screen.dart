@@ -3,7 +3,9 @@ import 'package:rick_and_morty_app/features/common_widgets/common_widgets.dart';
 import 'package:rick_and_morty_app/features/favourites_tab/models/favorites_sort_type.dart';
 
 class FavoritesScreen extends StatefulWidget {
-  const FavoritesScreen({super.key});
+  final ThemeNotifier themeNotifier;
+
+  const FavoritesScreen({super.key, required this.themeNotifier});
 
   @override
   State<FavoritesScreen> createState() => _FavoritesScreenState();
@@ -42,9 +44,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Избранное'),
-        centerTitle: true,
+      appBar: MainAppBar(
+        title: 'Избранное',
+        themeNotifier: widget.themeNotifier,
         actions: [
           PopupMenuButton<FavoriteSortType>(
             onSelected: _onSortChanged,

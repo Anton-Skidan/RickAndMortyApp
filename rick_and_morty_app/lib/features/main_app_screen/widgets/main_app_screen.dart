@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:rick_and_morty_app/features/characters_tab/view.dart';
+import 'package:rick_and_morty_app/features/common_widgets/main_app_bar.dart';
 import 'package:rick_and_morty_app/features/favourites_tab/view.dart';
 
 class MainAppScreen extends StatefulWidget {
-  const MainAppScreen({super.key});
+  final ThemeNotifier themeNotifier;
+  const MainAppScreen({super.key, required this.themeNotifier});
 
   @override
-  State<MainAppScreen> createState() => _MainTabScreenState();
+  State<MainAppScreen> createState() => _MainAppScreenState();
 }
 
-class _MainTabScreenState extends State<MainAppScreen> {
+class _MainAppScreenState extends State<MainAppScreen> {
   int _currentIndex = 0;
 
   late final List<Widget> _screens;
@@ -17,18 +19,15 @@ class _MainTabScreenState extends State<MainAppScreen> {
   @override
   void initState() {
     super.initState();
-    _screens = const [
-      CharactersScreen(),
-      FavoritesScreen(),
+    _screens = [
+      CharactersScreen(themeNotifier: widget.themeNotifier),
+      FavoritesScreen(themeNotifier: widget.themeNotifier),
     ];
   }
 
   void _onTabSelected(int index) {
     if (_currentIndex == index) return;
-
-    setState(() {
-      _currentIndex = index;
-    });
+    setState(() => _currentIndex = index);
   }
 
   @override

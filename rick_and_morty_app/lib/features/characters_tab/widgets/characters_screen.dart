@@ -2,19 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:rick_and_morty_app/features/common_widgets/common_widgets.dart';
 
 class CharactersScreen extends StatelessWidget {
-  const CharactersScreen({super.key});
+  final ThemeNotifier themeNotifier;
+  const CharactersScreen({super.key, required this.themeNotifier});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Персонажи'),
-        centerTitle: true,
+      appBar: MainAppBar(
+        title: 'Персонажи',
+        themeNotifier: themeNotifier,
       ),
       body: SafeArea(
-        child: CharactersListView(
-          characters: _mockCharacters,
-        ),
+        child: CharactersListView(characters: _mockCharacters),
       ),
     );
   }
