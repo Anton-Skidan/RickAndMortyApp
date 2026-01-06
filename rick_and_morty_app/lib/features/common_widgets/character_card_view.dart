@@ -46,24 +46,35 @@ class CharacterCard extends StatelessWidget {
               ),
             ),
           ),
+
           Positioned(
             top: 8,
             left: 8,
-            child: IconButton(
-              iconSize: 32,
-              icon: Icon(
-                isRemovable
-                    ? Icons.delete_outline
-                    : isFavorite
-                        ? Icons.favorite
-                        : Icons.favorite_border,
-                color: Colors.redAccent,
+            child: GestureDetector(
+              onTap: onAction == null ? null : () => onAction!(character),
+              child: AnimatedScale(
+                scale: isFavorite ? 1.25 : 1.0,
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.elasticOut,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  transitionBuilder: (child, animation) =>
+                      ScaleTransition(scale: animation, child: child),
+                  child: Icon(
+                    isRemovable
+                        ? Icons.delete_outline
+                        : isFavorite
+                            ? Icons.star
+                            : Icons.star_border,
+                    key: ValueKey(isFavorite),
+                    color: Colors.redAccent,
+                    size: 32,
+                  ),
+                ),
               ),
-              onPressed: onAction == null
-                  ? null
-                  : () => onAction!(character),
             ),
           ),
+
           Positioned(
             left: 12,
             right: 12,

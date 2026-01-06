@@ -67,8 +67,12 @@ class _CharactersScreenState extends State<CharactersScreen> {
         if (!charactersBox.values.any((e) => e.id == c.id)) {
           charactersBox.add(CharacterHiveModel.fromCardModel(c));
         }
+      }
 
-        await precacheImage(CachedNetworkImageProvider(c.imageUrl), context);
+      if (!mounted) return;
+
+      for (final c in uiData) {
+        precacheImage(CachedNetworkImageProvider(c.imageUrl), context);
       }
 
       setState(() => _characters = uiData);
