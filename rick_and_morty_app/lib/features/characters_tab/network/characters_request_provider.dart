@@ -1,12 +1,12 @@
 import 'characters_request_repository.dart';
 import 'models/character_network_model.dart';
 
-abstract class AbstractCharactersProvider {
+abstract class CharactersRequestProvider {
   Future<List<CharacterNetworkModel>> fetchCharacters({int page});
 }
 
-class CharactersProvider implements AbstractCharactersProvider {
-  final CharactersRepository _repository;
+class CharactersProvider implements CharactersRequestProvider {
+  final CharactersRequestRepository _repository;
 
   CharactersProvider(this._repository);
 

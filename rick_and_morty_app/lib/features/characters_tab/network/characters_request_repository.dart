@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'models/character_network_model.dart';
 
-class CharactersRepository {
+class CharactersRequestRepository {
   final Dio _dio = Dio(
     BaseOptions(
       baseUrl: "https://rickandmortyapi.com/api",

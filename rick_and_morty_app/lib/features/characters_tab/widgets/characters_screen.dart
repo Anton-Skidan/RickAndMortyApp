@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hive/hive.dart';
-import 'package:rick_and_morty_app/features/characters_tab/localStorage/storage.dart';
+import 'package:rick_and_morty_app/features/local_storage/storage.dart';
 import 'package:rick_and_morty_app/features/characters_tab/network/characters_network.dart';
 import 'package:rick_and_morty_app/features/common_widgets/common_widgets.dart';
 
@@ -47,7 +47,7 @@ class _CharactersScreenState extends State<CharactersScreen> {
         setState(() => _characters = cached);
       }
 
-      final provider = GetIt.instance<AbstractCharactersProvider>();
+      final provider = GetIt.instance<CharactersRequestProvider>();
       final networkData = await provider.fetchCharacters(page: 1);
 
       final uiData = networkData

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
-import 'package:rick_and_morty_app/features/characters_tab/localStorage/storage.dart';
+import 'package:rick_and_morty_app/features/local_storage/storage.dart';
 import 'package:rick_and_morty_app/features/common_widgets/common_widgets.dart';
 import 'package:rick_and_morty_app/features/favourites_tab/models/favorites_sort_type.dart';
 
