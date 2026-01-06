@@ -1,29 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:rick_and_morty_app/features/characters_tab/models/character_model.dart';
-import 'character_card_view.dart';
+import 'package:rick_and_morty_app/features/common_widgets/common_widgets.dart';
 
 class CharactersScreen extends StatelessWidget {
   const CharactersScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final characters = _mockCharacters;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Персонажи'),
         centerTitle: true,
       ),
       body: SafeArea(
-        child: ListView.separated(
-          padding: const EdgeInsets.all(16),
-          itemCount: characters.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 16),
-          itemBuilder: (context, index) {
-            return CharacterCard(
-              character: characters[index],
-            );
-          },
+        child: CharactersListView(
+          characters: _mockCharacters,
         ),
       ),
     );
