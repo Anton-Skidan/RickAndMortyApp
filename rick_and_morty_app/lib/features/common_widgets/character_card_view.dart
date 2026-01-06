@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'models/character_model.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class CharacterCard extends StatelessWidget {
   final CharacterCardModel character;
@@ -24,7 +25,7 @@ class CharacterCard extends StatelessWidget {
         border: Border.all(width: 1, color: Colors.grey.shade300),
         borderRadius: BorderRadius.circular(12),
         image: DecorationImage(
-          image: NetworkImage(character.imageUrl),
+          image: CachedNetworkImageProvider(character.imageUrl),
           fit: BoxFit.cover,
         ),
       ),
@@ -45,7 +46,6 @@ class CharacterCard extends StatelessWidget {
               ),
             ),
           ),
-
           Positioned(
             top: 8,
             left: 8,
@@ -57,14 +57,13 @@ class CharacterCard extends StatelessWidget {
                     : isFavorite
                         ? Icons.favorite
                         : Icons.favorite_border,
-                color: isRemovable ? Colors.white : Colors.redAccent,
+                color: Colors.redAccent,
               ),
               onPressed: onAction == null
                   ? null
                   : () => onAction!(character),
             ),
           ),
-
           Positioned(
             left: 12,
             right: 12,
@@ -91,7 +90,7 @@ class CharacterCard extends StatelessWidget {
                   style: const TextStyle(color: Colors.white),
                 ),
                 Text(
-                  'Тип: ${character.species}',
+                  'Вид: ${character.species}',
                   style: const TextStyle(color: Colors.white),
                 ),
               ],

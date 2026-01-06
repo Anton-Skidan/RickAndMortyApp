@@ -3,24 +3,23 @@ import 'package:rick_and_morty_app/features/common_widgets/common_widgets.dart';
 
 part 'character_hive_model.g.dart';
 
-@HiveType(typeId: 0)
+@HiveType(typeId: 1)
 class CharacterHiveModel extends HiveObject {
   @HiveField(0)
-  String name;
-
+  final int id;
   @HiveField(1)
-  String imageUrl;
-
+  final String name;
   @HiveField(2)
-  String location;
-
+  final String imageUrl;
   @HiveField(3)
-  String status;
-
+  final String location;
   @HiveField(4)
-  String species;
+  final String status;
+  @HiveField(5)
+  final String species;
 
   CharacterHiveModel({
+    required this.id,
     required this.name,
     required this.imageUrl,
     required this.location,
@@ -28,23 +27,21 @@ class CharacterHiveModel extends HiveObject {
     required this.species,
   });
 
-    factory CharacterHiveModel.fromCardModel(CharacterCardModel card) {
-      return CharacterHiveModel(
-        name: card.name,
-        imageUrl: card.imageUrl,
-        location: card.location,
-        status: card.status,
-        species: card.species,
+  CharacterCardModel toCardModel() => CharacterCardModel(
+        id: id,
+        name: name,
+        imageUrl: imageUrl,
+        location: location,
+        status: status,
+        species: species,
       );
-    }
 
-  CharacterCardModel toCardModel() {
-  return CharacterCardModel(
-    name: name,
-    imageUrl: imageUrl,
-    location: location,
-    status: status,
-    species: species,
-  );
+  factory CharacterHiveModel.fromCardModel(CharacterCardModel c) => CharacterHiveModel(
+        id: c.id,
+        name: c.name,
+        imageUrl: c.imageUrl,
+        location: c.location,
+        status: c.status,
+        species: c.species,
+      );
 }
-  }

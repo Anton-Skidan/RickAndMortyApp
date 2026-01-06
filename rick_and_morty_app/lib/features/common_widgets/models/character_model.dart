@@ -1,4 +1,5 @@
 class CharacterCardModel {
+  final int id;
   final String imageUrl;
   final String name;
   final String location;
@@ -6,6 +7,7 @@ class CharacterCardModel {
   final String species;
 
   CharacterCardModel({
+    required this.id,
     required this.imageUrl,
     required this.name,
     required this.location,

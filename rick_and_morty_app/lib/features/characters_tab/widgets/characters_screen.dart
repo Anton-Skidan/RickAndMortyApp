@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hive/hive.dart';
@@ -8,10 +9,7 @@ import 'package:rick_and_morty_app/features/common_widgets/common_widgets.dart';
 class CharactersScreen extends StatefulWidget {
   final ThemeNotifier themeNotifier;
 
-  const CharactersScreen({
-    super.key,
-    required this.themeNotifier,
-  });
+  const CharactersScreen({super.key, required this.themeNotifier});
 
   @override
   State<CharactersScreen> createState() => _CharactersScreenState();
@@ -37,15 +35,27 @@ class _CharactersScreenState extends State<CharactersScreen> {
       _errorMessage = null;
     });
 
+    final charactersBox = Hive.box<CharacterHiveModel>('characters');
+
     try {
+      final cached = charactersBox.values
+          .whereType<CharacterHiveModel>()
+          .map((e) => e.toCardModel())
+          .toList();
+
+      if (cached.isNotEmpty) {
+        setState(() => _characters = cached);
+      }
+
       final provider = GetIt.instance<AbstractCharactersProvider>();
       final networkData = await provider.fetchCharacters(page: 1);
 
       final uiData = networkData
           .map(
             (e) => CharacterCardModel(
-              imageUrl: e.imageUrl,
+              id: e.id,
               name: e.name,
+              imageUrl: e.imageUrl,
               location: e.location,
               status: e.status,
               species: e.species,
@@ -53,18 +63,22 @@ class _CharactersScreenState extends State<CharactersScreen> {
           )
           .toList();
 
-      setState(() {
-        _characters = uiData;
-      });
+      for (final c in uiData) {
+        if (!charactersBox.values.any((e) => e.id == c.id)) {
+          charactersBox.add(CharacterHiveModel.fromCardModel(c));
+        }
+
+        await precacheImage(CachedNetworkImageProvider(c.imageUrl), context);
+      }
+
+      setState(() => _characters = uiData);
     } catch (e) {
-      setState(() {
-        _errorMessage = 'Ошибка загрузки персонажей';
-      });
+      if (_characters.isEmpty) {
+        setState(() => _errorMessage = 'Ошибка загрузки персонажей');
+      }
       debugPrint('Ошибка загрузки персонажей: $e');
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
   }
 
@@ -72,7 +86,7 @@ class _CharactersScreenState extends State<CharactersScreen> {
     CharacterHiveModel? existing;
 
     for (final item in _favoritesBox.values.whereType<CharacterHiveModel>()) {
-      if (item.name == character.name) {
+      if (item.id == character.id) {
         existing = item;
         break;
       }
@@ -81,9 +95,7 @@ class _CharactersScreenState extends State<CharactersScreen> {
     if (existing != null) {
       existing.delete();
     } else {
-      _favoritesBox.add(
-        CharacterHiveModel.fromCardModel(character),
-      );
+      _favoritesBox.add(CharacterHiveModel.fromCardModel(character));
     }
 
     setState(() {});
@@ -107,12 +119,12 @@ class _CharactersScreenState extends State<CharactersScreen> {
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _errorMessage != null
-                ? Center(child: Text(_errorMessage!))
-                : CharactersListView(
-                    characters: _characters,
-                    favorites: _favoriteCards(),
-                    onAction: _toggleFavorite,
-                  ),
+            ? Center(child: Text(_errorMessage!))
+            : CharactersListView(
+                characters: _characters,
+                favorites: _favoriteCards(),
+                onAction: _toggleFavorite,
+              ),
       ),
     );
   }

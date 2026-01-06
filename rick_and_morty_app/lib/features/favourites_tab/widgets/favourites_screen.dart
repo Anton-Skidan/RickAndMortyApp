@@ -29,12 +29,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   void _onSortChanged(FavoriteSortType sortType) {
     setState(() => _currentSort = sortType);
   }
-  
+
   void _removeFromFavorites(CharacterCardModel character) {
     CharacterHiveModel? hiveObject;
 
     for (final item in _favoritesBox.values.whereType<CharacterHiveModel>()) {
-      if (item.name == character.name) {
+      if (item.id == character.id) {
         hiveObject = item;
         break;
       }

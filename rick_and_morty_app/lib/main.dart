@@ -6,6 +6,8 @@ import 'package:rick_and_morty_app/features/characters_tab/localStorage/storage.
 import 'package:rick_and_morty_app/features/characters_tab/network/characters_network.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   final getIt = GetIt.instance;
   getIt.registerLazySingleton<CharactersRepository>(() => CharactersRepository());
   getIt.registerLazySingleton<AbstractCharactersProvider>(
@@ -15,9 +17,8 @@ Future<void> main() async {
   await Hive.initFlutter();
 
   Hive.registerAdapter(CharacterHiveModelAdapter());
+  await Hive.openBox<CharacterHiveModel>('characters');
   await Hive.openBox<CharacterHiveModel>('favorites');
-
-  WidgetsFlutterBinding.ensureInitialized();
   
   runApp(const RickAndMortyTestApp());
 }

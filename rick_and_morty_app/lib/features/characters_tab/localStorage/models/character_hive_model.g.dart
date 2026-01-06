@@ -8,7 +8,7 @@ part of 'character_hive_model.dart';
 
 class CharacterHiveModelAdapter extends TypeAdapter<CharacterHiveModel> {
   @override
-  final int typeId = 0;
+  final int typeId = 1;
 
   @override
   CharacterHiveModel read(BinaryReader reader) {
@@ -16,28 +16,32 @@ class CharacterHiveModelAdapter extends TypeAdapter<CharacterHiveModel> {
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
+
     return CharacterHiveModel(
-      name: fields[0] as String,
-      imageUrl: fields[1] as String,
-      location: fields[2] as String,
-      status: fields[3] as String,
-      species: fields[4] as String,
+      id: fields[0] as int, 
+      name: fields[1] as String,
+      imageUrl: fields[2] as String,
+      location: fields[3] as String,
+      status: fields[4] as String,
+      species: fields[5] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, CharacterHiveModel obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
-      ..write(obj.name)
+      ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.imageUrl)
+      ..write(obj.name)
       ..writeByte(2)
-      ..write(obj.location)
+      ..write(obj.imageUrl)
       ..writeByte(3)
-      ..write(obj.status)
+      ..write(obj.location)
       ..writeByte(4)
+      ..write(obj.status)
+      ..writeByte(5)
       ..write(obj.species);
   }
 

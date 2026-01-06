@@ -1,4 +1,5 @@
 class CharacterNetworkModel {
+  final int id;
   final String imageUrl;
   final String name;
   final String location;
@@ -6,6 +7,7 @@ class CharacterNetworkModel {
   final String species;
 
   CharacterNetworkModel({
+    required this.id,
     required this.imageUrl,
     required this.name,
     required this.location,
@@ -19,7 +21,8 @@ class CharacterNetworkModel {
       name: json['name'] as String,
       location: (json['location']?['name'] ?? '') as String,
       status: json['status'] as String,
-      species: json['species'] as String,
+      species: json['species'] as String, 
+      id: json['id'] as int,
     );
   }
 }
