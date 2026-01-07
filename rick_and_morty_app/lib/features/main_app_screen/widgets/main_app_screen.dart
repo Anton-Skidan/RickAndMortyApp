@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rick_and_morty_app/features/characters_tab/view.dart';
 import 'package:rick_and_morty_app/features/common_widgets/main_app_bar.dart';
-import 'package:rick_and_morty_app/features/favourites_tab/view.dart';
+import 'package:rick_and_morty_app/features/favorites_tab/view.dart';
 
 class MainAppScreen extends StatefulWidget {
   final ThemeNotifier themeNotifier;
