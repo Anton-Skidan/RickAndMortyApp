@@ -1,3 +1,5 @@
+import 'package:rick_and_morty_app/features/common_widgets/common_widgets.dart';
+
 class CharacterNetworkModel {
   final int id;
   final String imageUrl;
@@ -17,12 +19,21 @@ class CharacterNetworkModel {
 
   factory CharacterNetworkModel.fromJson(Map<String, dynamic> json) {
     return CharacterNetworkModel(
+      id: json['id'] as int,
       imageUrl: json['image'] as String,
       name: json['name'] as String,
       location: (json['location']?['name'] ?? '') as String,
       status: json['status'] as String,
       species: json['species'] as String,
-      id: json['id'] as int,
     );
   }
+
+  CharacterCardModel toCardModel() => CharacterCardModel(
+        id: id,
+        name: name,
+        imageUrl: imageUrl,
+        location: location,
+        status: status,
+        species: species,
+      );
 }

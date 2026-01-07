@@ -10,5 +10,3 @@ class ToggleFavoriteCharacter extends CharactersEvent {
   final CharacterCardModel character;
   ToggleFavoriteCharacter(this.character);
 }
-
-class _RefreshFavorites extends CharactersEvent {}

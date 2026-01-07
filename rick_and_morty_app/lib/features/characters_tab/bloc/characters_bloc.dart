@@ -9,161 +9,95 @@ part 'characters_event.dart';
 part 'characters_state.dart';
 
 class CharactersBloc extends Bloc<CharactersEvent, CharactersState> {
-  CharactersBloc(this._requestProvider, this._charactersBox, this._favoritesBox)
-    : super(CharactersInitial()) {
-    on<LoadCharacters>(_handleInitialLoad);
-    on<LoadNextPage>(_handlePagination);
-    on<ToggleFavoriteCharacter>(_handleToggleFavorite);
-    on<_RefreshFavorites>(_handleFavoritesSync);
+  CharactersBloc(this._provider, this._charactersBox, this._favoritesBox)
+    : super(CharactersLoading()) {
+    on<LoadCharacters>(_onLoad);
+    on<LoadNextPage>(_onLoadNextPage);
+    on<ToggleFavoriteCharacter>(_onToggleFavorite);
+
+    _charactersSubscription = _charactersBox.watch().listen((_) {
+      add(LoadCharacters());
+    });
 
     _favoritesSubscription = _favoritesBox.watch().listen((_) {
-      add(_RefreshFavorites());
+      add(LoadCharacters());
     });
   }
 
-  final CharactersRequestProvider _requestProvider;
+  final CharactersRequestProvider _provider;
   final Box<CharacterHiveModel> _charactersBox;
   final Box<CharacterHiveModel> _favoritesBox;
 
+  late final StreamSubscription<BoxEvent> _charactersSubscription;
   late final StreamSubscription<BoxEvent> _favoritesSubscription;
 
   int _currentPage = 1;
-  bool _hasMorePages = true;
-  bool _isRequestInProgress = false;
+  bool _hasMore = true;
+  bool _isFetching = false;
 
-  Future<void> _handleInitialLoad(
-    LoadCharacters event,
-    Emitter<CharactersState> emit,
-  ) async {
-    emit(CharactersLoading());
+  void _onLoad(LoadCharacters event, Emitter<CharactersState> emit) {
+    final cached = _charactersBox.values.map((e) => e.toCardModel()).toList();
 
-    final cachedCharacters = _charactersBox.values
-        .map((hiveModel) => hiveModel.toCardModel())
-        .toList();
-
-    if (cachedCharacters.isNotEmpty) {
-      emit(_buildLoadedState(cachedCharacters));
+    if (cached.isNotEmpty) {
+      emit(_buildLoaded(cached));
     }
 
-    try {
-      final networkCharacters = await _requestProvider.fetchCharacters(page: 1);
-
-      final mappedCharacters = networkCharacters
-          .map(_mapNetworkToCardModel)
-          .toList();
-
-      _persistNewCharacters(mappedCharacters);
-
-      _currentPage = 1;
-      _hasMorePages = mappedCharacters.isNotEmpty;
-
-      emit(_buildLoadedState(mappedCharacters));
-    } catch (exception) {
-      emit(CharactersFailure(exception));
-    }
+    _fetchFromNetwork();
   }
 
-  Future<void> _handlePagination(
+  Future<void> _fetchFromNetwork() async {
+    try {
+      final network = await _provider.fetchCharacters(page: _currentPage);
+
+      final fresh = network.map((e) => e.toCardModel()).toList();
+
+      for (final c in fresh) {
+        if (!_charactersBox.values.any((e) => e.id == c.id)) {
+          _charactersBox.add(CharacterHiveModel.fromCardModel(c));
+        }
+      }
+
+      _hasMore = fresh.isNotEmpty;
+      _currentPage++;
+    } catch (_) {}
+  }
+
+  Future<void> _onLoadNextPage(
     LoadNextPage event,
     Emitter<CharactersState> emit,
   ) async {
-    if (_isRequestInProgress || !_hasMorePages || state is! CharactersLoaded) {
-      return;
-    }
-
-    _isRequestInProgress = true;
-
-    final currentState = state as CharactersLoaded;
-    emit(currentState.copyWith(isPageLoading: true));
-
-    try {
-      final nextPage = _currentPage + 1;
-      final networkCharacters = await _requestProvider.fetchCharacters(
-        page: nextPage,
-      );
-
-      final mappedCharacters = networkCharacters
-          .map(_mapNetworkToCardModel)
-          .toList();
-
-      _persistNewCharacters(mappedCharacters);
-
-      _currentPage = nextPage;
-      _hasMorePages = mappedCharacters.isNotEmpty;
-
-      emit(
-        currentState.copyWith(
-          characters: [...currentState.characters, ...mappedCharacters],
-          hasMore: _hasMorePages,
-          isPageLoading: false,
-        ),
-      );
-    } finally {
-      _isRequestInProgress = false;
-    }
+    if (_isFetching || !_hasMore) return;
+    _isFetching = true;
+    await _fetchFromNetwork();
+    _isFetching = false;
   }
 
-  void _handleToggleFavorite(
+  void _onToggleFavorite(
     ToggleFavoriteCharacter event,
     Emitter<CharactersState> emit,
   ) {
-    CharacterHiveModel? existingFavorite;
-    try {
-      existingFavorite = _favoritesBox.values
-          .cast<CharacterHiveModel>()
-          .firstWhere((favorite) => favorite.id == event.character.id);
-    } catch (_) {
-      existingFavorite = null;
-    }
-
-    if (existingFavorite != null) {
-      existingFavorite.delete();
-    } else {
-      _favoritesBox.add(CharacterHiveModel.fromCardModel(event.character));
-    }
-  }
-
-  void _handleFavoritesSync(
-    _RefreshFavorites event,
-    Emitter<CharactersState> emit,
-  ) {
-    if (state is CharactersLoaded) {
-      final currentState = state as CharactersLoaded;
-      emit(_buildLoadedState(currentState.characters));
-    }
-  }
-
-  CharactersLoaded _buildLoadedState(List<CharacterCardModel> characters) {
-    return CharactersLoaded(
-      characters: characters,
-      favoriteIds: _favoritesBox.values.map((favorite) => favorite.id).toSet(),
-      hasMore: _hasMorePages,
-    );
-  }
-
-  CharacterCardModel _mapNetworkToCardModel(dynamic networkModel) {
-    return CharacterCardModel(
-      id: networkModel.id,
-      name: networkModel.name,
-      imageUrl: networkModel.imageUrl,
-      location: networkModel.location,
-      status: networkModel.status,
-      species: networkModel.species,
-    );
-  }
-
-  void _persistNewCharacters(List<CharacterCardModel> characters) {
-    final existingIds = _charactersBox.values.map((c) => c.id).toSet();
-
-    for (final character in characters) {
-      if (!existingIds.contains(character.id)) {
-        _charactersBox.add(CharacterHiveModel.fromCardModel(character));
+    for (final item in _favoritesBox.values) {
+      if (item.id == event.character.id) {
+        item.delete();
+        return;
       }
     }
+
+    _favoritesBox.add(CharacterHiveModel.fromCardModel(event.character));
+  }
+
+  CharactersLoaded _buildLoaded(List<CharacterCardModel> characters) {
+    return CharactersLoaded(
+      characters: characters,
+      favoriteIds: _favoritesBox.values.map((e) => e.id).toSet(),
+      hasMore: _hasMore,
+      isPageLoading: _isFetching,
+    );
   }
 
   @override
   Future<void> close() {
+    _charactersSubscription.cancel();
     _favoritesSubscription.cancel();
     return super.close();
   }

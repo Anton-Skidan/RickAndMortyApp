@@ -25,50 +25,71 @@ class CharacterCard extends StatefulWidget {
 }
 
 class _CharacterCardState extends State<CharacterCard>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late final Animation<double> _scale;
-  late final Animation<double> _fade;
+    with TickerProviderStateMixin {
+  late final AnimationController _removeController;
+  late final Animation<double> _removeScale;
+  late final Animation<double> _removeFade;
+
+  late final AnimationController _favoriteController;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
+
+    _removeController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 260),
     );
 
-    _scale = Tween<double>(
+    _removeScale = Tween<double>(
       begin: 1,
       end: 0.85,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
+    ).animate(CurvedAnimation(parent: _removeController, curve: Curves.easeIn));
 
-    _fade = Tween<double>(
-      begin: 1,
-      end: 0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _removeFade = Tween<double>(begin: 1, end: 0).animate(
+      CurvedAnimation(parent: _removeController, curve: Curves.easeOut),
+    );
+
+    _favoriteController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 180),
+      lowerBound: 0.85,
+      upperBound: 1.2,
+    )..value = 1;
+  }
+
+  @override
+  void didUpdateWidget(covariant CharacterCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (!oldWidget.isFavorite && widget.isFavorite) {
+      _favoriteController
+        ..forward()
+        ..reverse();
+    }
   }
 
   Future<void> _handleRemove() async {
     if (widget.onAction == null) return;
 
-    await _controller.forward();
+    await _removeController.forward();
     widget.onAction!(widget.character);
-    _controller.reset();
+    _removeController.reset();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _removeController.dispose();
+    _favoriteController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return FadeTransition(
-      opacity: _fade,
+      opacity: _removeFade,
       child: ScaleTransition(
-        scale: _scale,
+        scale: _removeScale,
         child: Container(
           height: CharacterCard.height,
           width: double.infinity,
@@ -102,21 +123,32 @@ class _CharacterCardState extends State<CharacterCard>
               Positioned(
                 top: 8,
                 left: 8,
-                child: IconButton(
-                  iconSize: CharacterCard.iconSize,
-                  icon: Icon(
-                    widget.isRemovable
-                        ? Icons.delete_outline
-                        : widget.isFavorite
-                        ? Icons.star
-                        : Icons.star_border,
-                    color: Colors.redAccent,
+                child: ScaleTransition(
+                  scale: _favoriteController,
+                  child: IconButton(
+                    iconSize: CharacterCard.iconSize,
+                    icon: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 160),
+                      transitionBuilder: (child, animation) =>
+                          ScaleTransition(scale: animation, child: child),
+                      child: Icon(
+                        widget.isRemovable
+                            ? Icons.delete_outline
+                            : widget.isFavorite
+                            ? Icons.star
+                            : Icons.star_border,
+                        key: ValueKey(
+                          '${widget.isRemovable}_${widget.isFavorite}',
+                        ),
+                        color: Colors.redAccent,
+                      ),
+                    ),
+                    onPressed: widget.isRemovable
+                        ? _handleRemove
+                        : widget.onAction == null
+                        ? null
+                        : () => widget.onAction!(widget.character),
                   ),
-                  onPressed: widget.isRemovable
-                      ? _handleRemove
-                      : widget.onAction == null
-                      ? null
-                      : () => widget.onAction!(widget.character),
                 ),
               ),
               Positioned(
