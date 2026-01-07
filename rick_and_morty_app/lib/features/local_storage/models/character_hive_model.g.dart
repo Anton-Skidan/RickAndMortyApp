@@ -18,7 +18,7 @@ class CharacterHiveModelAdapter extends TypeAdapter<CharacterHiveModel> {
     };
 
     return CharacterHiveModel(
-      id: fields[0] as int, 
+      id: fields[0] as int,
       name: fields[1] as String,
       imageUrl: fields[2] as String,
       location: fields[3] as String,

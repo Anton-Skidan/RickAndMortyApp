@@ -3,6 +3,7 @@ part of 'characters_bloc.dart';
 abstract class CharactersEvent {}
 
 class LoadCharacters extends CharactersEvent {}
+
 class LoadNextPage extends CharactersEvent {}
 
 class ToggleFavoriteCharacter extends CharactersEvent {

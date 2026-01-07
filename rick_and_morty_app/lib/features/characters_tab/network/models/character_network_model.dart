@@ -21,7 +21,7 @@ class CharacterNetworkModel {
       name: json['name'] as String,
       location: (json['location']?['name'] ?? '') as String,
       status: json['status'] as String,
-      species: json['species'] as String, 
+      species: json['species'] as String,
       id: json['id'] as int,
     );
   }

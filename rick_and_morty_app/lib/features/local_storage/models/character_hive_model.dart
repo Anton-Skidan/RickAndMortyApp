@@ -28,15 +28,16 @@ class CharacterHiveModel extends HiveObject {
   });
 
   CharacterCardModel toCardModel() => CharacterCardModel(
-        id: id,
-        name: name,
-        imageUrl: imageUrl,
-        location: location,
-        status: status,
-        species: species,
-      );
+    id: id,
+    name: name,
+    imageUrl: imageUrl,
+    location: location,
+    status: status,
+    species: species,
+  );
 
-  factory CharacterHiveModel.fromCardModel(CharacterCardModel c) => CharacterHiveModel(
+  factory CharacterHiveModel.fromCardModel(CharacterCardModel c) =>
+      CharacterHiveModel(
         id: c.id,
         name: c.name,
         imageUrl: c.imageUrl,

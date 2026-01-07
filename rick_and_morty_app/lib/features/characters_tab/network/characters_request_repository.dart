@@ -22,14 +22,13 @@ class CharactersRequestRepository {
         final data = response.data as Map<String, dynamic>;
         final results = data['results'] as List<dynamic>;
 
-        return results
-            .map((e) => CharacterNetworkModel.fromJson(e))
-            .toList();
-      } else {
-        throw Exception('Ошибка сервера: ${response.statusCode}');
+        return results.map((e) => CharacterNetworkModel.fromJson(e)).toList();
       }
-    } on DioException catch (e) {
-      throw Exception('Ошибка сети: ${e.message}');
+      return [];
+    } on DioException {
+      return [];
+    } catch (e) {
+      return [];
     }
   }
 }

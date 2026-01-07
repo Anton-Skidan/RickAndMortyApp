@@ -1,4 +1,1 @@
-enum FavoriteSortType {
-  name,
-  status
-}
+enum FavoriteSortType { name, status }

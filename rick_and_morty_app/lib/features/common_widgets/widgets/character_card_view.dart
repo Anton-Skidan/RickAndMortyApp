@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
-import 'models/character_model.dart';
+import '../models/character_model.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class CharacterCard extends StatelessWidget {
+  static const double _height = 240;
+  static const double _borderRadius = 12;
+  static const double _iconSize = 32;
+  static const EdgeInsets _infoPadding = EdgeInsets.all(12);
+
   final CharacterCardModel character;
   final bool isFavorite;
   final bool isRemovable;
@@ -19,11 +24,11 @@ class CharacterCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 240,
+      height: _height,
       width: double.infinity,
       decoration: BoxDecoration(
         border: Border.all(width: 1, color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(_borderRadius),
         image: DecorationImage(
           image: CachedNetworkImageProvider(character.imageUrl),
           fit: BoxFit.cover,
@@ -34,7 +39,7 @@ class CharacterCard extends StatelessWidget {
           Positioned.fill(
             child: DecoratedBox(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(_borderRadius),
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
@@ -50,35 +55,30 @@ class CharacterCard extends StatelessWidget {
           Positioned(
             top: 8,
             left: 8,
-            child: GestureDetector(
-              onTap: onAction == null ? null : () => onAction!(character),
-              child: AnimatedScale(
-                scale: isFavorite ? 1.25 : 1.0,
+            child: IconButton(
+              iconSize: _iconSize,
+              onPressed: onAction == null ? null : () => onAction!(character),
+              icon: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 220),
-                curve: Curves.elasticOut,
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 200),
-                  transitionBuilder: (child, animation) =>
-                      ScaleTransition(scale: animation, child: child),
-                  child: Icon(
-                    isRemovable
-                        ? Icons.delete_outline
-                        : isFavorite
-                            ? Icons.star
-                            : Icons.star_border,
-                    key: ValueKey(isFavorite),
-                    color: Colors.redAccent,
-                    size: 32,
-                  ),
+                transitionBuilder: (child, animation) =>
+                    ScaleTransition(scale: animation, child: child),
+                child: Icon(
+                  isRemovable
+                      ? Icons.delete_outline
+                      : isFavorite
+                      ? Icons.star
+                      : Icons.star_border,
+                  key: ValueKey('${isRemovable}_$isFavorite'),
+                  color: Colors.redAccent,
                 ),
               ),
             ),
           ),
 
           Positioned(
-            left: 12,
-            right: 12,
-            bottom: 12,
+            left: _infoPadding.left,
+            right: _infoPadding.right,
+            bottom: _infoPadding.bottom,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,

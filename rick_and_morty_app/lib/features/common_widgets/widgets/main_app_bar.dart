@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
-
-class ThemeNotifier extends ValueNotifier<ThemeMode> {
-  ThemeNotifier(super.mode);
-
-  void toggle() {
-    value = value == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
-  }
-}
+import 'package:rick_and_morty_app/features/common_widgets/common_widgets.dart';
+import 'package:rick_and_morty_app/main/theme_notifier.dart';
 
 class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -28,17 +22,7 @@ class MainAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       actions: [
         if (actions != null) ...actions!,
-        ValueListenableBuilder<ThemeMode>(
-          valueListenable: themeNotifier,
-          builder: (context, mode, _) {
-            return IconButton(
-              icon: Icon(
-                mode == ThemeMode.light ? Icons.dark_mode : Icons.light_mode,
-              ),
-              onPressed: () => themeNotifier.toggle(),
-            );
-          },
-        ),
+        ThemeToggleView(themeNotifier: themeNotifier),
       ],
     );
   }

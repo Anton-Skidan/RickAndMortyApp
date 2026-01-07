@@ -25,10 +25,7 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
   FavoriteSortType _currentSort = FavoriteSortType.name;
 
   void _onLoad(LoadFavorites event, Emitter<FavoritesState> emit) {
-    emit(FavoritesLoaded(
-      favorites: _sortedFavorites(),
-      sortType: _currentSort,
-    ));
+    _emitSorted(emit);
   }
 
   void _onRemove(RemoveFavorite event, Emitter<FavoritesState> emit) {
@@ -38,30 +35,33 @@ class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
         break;
       }
     }
+    _emitSorted(emit);
   }
 
   void _onSort(ChangeSort event, Emitter<FavoritesState> emit) {
     _currentSort = event.sortType;
-    emit(FavoritesLoaded(
-      favorites: _sortedFavorites(),
-      sortType: _currentSort,
-    ));
+    _emitSorted(emit);
+  }
+
+  void _emitSorted(Emitter<FavoritesState> emit) {
+    emit(
+      FavoritesLoaded(favorites: _sortedFavorites(), sortType: _currentSort),
+    );
   }
 
   List<CharacterCardModel> _sortedFavorites() {
-    final list =
-        _favoritesBox.values.map((e) => e.toCardModel()).toList();
+    final favorites = _favoritesBox.values.map((e) => e.toCardModel()).toList();
 
     switch (_currentSort) {
       case FavoriteSortType.name:
-        list.sort((a, b) => a.name.compareTo(b.name));
+        favorites.sort((a, b) => a.name.compareTo(b.name));
         break;
       case FavoriteSortType.status:
-        list.sort((a, b) => a.status.compareTo(b.status));
+        favorites.sort((a, b) => a.status.compareTo(b.status));
         break;
     }
 
-    return list;
+    return favorites;
   }
 
   @override

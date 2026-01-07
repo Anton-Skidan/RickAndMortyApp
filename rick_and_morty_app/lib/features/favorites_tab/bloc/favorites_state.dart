@@ -8,8 +8,5 @@ class FavoritesLoaded extends FavoritesState {
   final List<CharacterCardModel> favorites;
   final FavoriteSortType sortType;
 
-  FavoritesLoaded({
-    required this.favorites,
-    required this.sortType,
-  });
+  FavoritesLoaded({required this.favorites, required this.sortType});
 }
