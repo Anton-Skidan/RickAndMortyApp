@@ -1,16 +1,57 @@
-# rick_and_morty_app
+# Rick and Morty Characters App
 
-A new Flutter project.
+Мобильное приложение на Flutter для просмотра персонажей мультсериала «Rick and Morty» с поддержкой избранного, офлайн-доступа и пагинации.
 
-## Getting Started
+## Описание
 
-This project is a starting point for a Flutter application.
+Приложение загружает список персонажей с публичного API Rick and Morty, позволяет добавлять их в избранное и просматривать данные без подключения к интернету благодаря локальному кешированию.
 
-A few resources to get you started if this is your first Flutter project:
+## Функциональность
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- Список персонажей в виде карточке с данными о персонажах
+- Пагинация по достижению последней загруженной карточки
+- Добавление и удаление из избранного  
+- Экран избранного с сортировкой  
+- Офлайн-доступ к приложению без сети интернет на основе уже загруженных данных
+- Кеширование изображений  
+- Поддержка светлой/темной темы
+- Анимированное добавление и удаление из избранного
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Используемые технологии
+
+- Flutter
+- flutter_bloc
+- Hive
+- Dio
+- cached_network_image
+- get_it
+
+## Структура проекта
+
+Проект выполнен в архитектуре bloc с разделением на две глобальные фичи - экран с карточками и экран избранного. Для удобства в отдельные директории вынесены локальное хранилище данных, переиспользуемые компоненты. Отдельными файлами реализованы поддержка темы, инжектирование зависимостей и первичная конфигурация приложения. При структурировании проекта предпочтение было отдано удобочитаемости и разделению ответственности
+
+## Установка и запуск
+
+Flutter 3.19.0 или выше
+Dart 3.3.0 или выше
+
+Для запуска предлагается воспользоваться возможностями github по загрузке проекта и открыть его (проект) в специализрованной ide или же реализовать в терминале код, представленный ниже:
+
+git clone https://github.com/Anton-Skidan/RickAndMortyApp.git
+cd rick_and_morty_app
+flutter pub get
+flutter run
+
+## Работа офлайн
+
+После первой загрузки данные в локальном хранилище через инструмент Hive.
+При повторном запуске без интернета данные отображаются из кеша.
+
+## API
+
+Используется публичный REST API Rick and Morty:
+https://rickandmortyapi.com/
+
+## Автор
+
+Антон Скидан (Anton Skidan)
