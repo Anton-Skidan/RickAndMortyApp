@@ -37,43 +37,48 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   Widget build(BuildContext context) {
     return BlocProvider.value(
       value: _bloc,
-      child: AppScaffoldView(
-        title: 'Избранное',
-        themeNotifier: widget.themeNotifier,
-        actions: [
-          PopupMenuButton<FavoriteSortType>(
-            onSelected: (s) => context.read<FavoritesBloc>().add(ChangeSort(s)),
-            itemBuilder: (_) => const [
-              PopupMenuItem(
-                value: FavoriteSortType.name,
-                child: Text('Сортировать по имени'),
-              ),
-              PopupMenuItem(
-                value: FavoriteSortType.status,
-                child: Text('Сортировать по статусу'),
+      child: Builder(
+        builder: (context) {
+          return AppScaffoldView(
+            title: 'Избранное',
+            themeNotifier: widget.themeNotifier,
+            actions: [
+              PopupMenuButton<FavoriteSortType>(
+                onSelected: (s) =>
+                    context.read<FavoritesBloc>().add(ChangeSort(s)),
+                itemBuilder: (_) => const [
+                  PopupMenuItem(
+                    value: FavoriteSortType.name,
+                    child: Text('Сортировать по имени'),
+                  ),
+                  PopupMenuItem(
+                    value: FavoriteSortType.status,
+                    child: Text('Сортировать по статусу'),
+                  ),
+                ],
               ),
             ],
-          ),
-        ],
-        body: BlocBuilder<FavoritesBloc, FavoritesState>(
-          builder: (context, state) {
-            if (state is FavoritesLoading) {
-              return const Center(child: CircularProgressIndicator());
-            }
+            body: BlocBuilder<FavoritesBloc, FavoritesState>(
+              builder: (context, state) {
+                if (state is FavoritesLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-            if (state is FavoritesLoaded) {
-              return CharactersListView(
-                characters: state.favorites,
-                isRemovable: true,
-                onAction: (c) =>
-                    context.read<FavoritesBloc>().add(RemoveFavorite(c)),
-                emptyText: 'Нет избранных персонажей',
-              );
-            }
+                if (state is FavoritesLoaded) {
+                  return CharactersListView(
+                    characters: state.favorites,
+                    isRemovable: true,
+                    onAction: (c) =>
+                        context.read<FavoritesBloc>().add(RemoveFavorite(c)),
+                    emptyText: 'Нет избранных персонажей',
+                  );
+                }
 
-            return const SizedBox.shrink();
-          },
-        ),
+                return const SizedBox.shrink();
+              },
+            ),
+          );
+        },
       ),
     );
   }
