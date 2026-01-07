@@ -15,6 +15,7 @@ class CharactersBloc extends Bloc<CharactersEvent, CharactersState> {
     this._favoritesBox,
   ) : super(CharactersInitial()) {
     on<LoadCharacters>(_onLoadCharacters);
+    on<LoadNextPage>(_onLoadNextPage);
     on<ToggleFavoriteCharacter>(_onToggleFavorite);
     on<_RefreshFavorites>(_onRefreshFavorites);
 
@@ -29,25 +30,30 @@ class CharactersBloc extends Bloc<CharactersEvent, CharactersState> {
 
   late final StreamSubscription<BoxEvent> _favoritesSubscription;
 
+  int _currentPage = 1;
+  bool _hasMore = true;
+  bool _isFetching = false;
+
   Future<void> _onLoadCharacters(
       LoadCharacters event, Emitter<CharactersState> emit) async {
     emit(CharactersLoading());
 
+    final cached = _charactersBox.values
+        .map((e) => e.toCardModel())
+        .toList();
+
+    if (cached.isNotEmpty) {
+      emit(CharactersLoaded(
+        characters: cached,
+        favoriteIds: _favoritesBox.values.map((e) => e.id).toSet(),
+        hasMore: true,
+      ));
+    }
+
     try {
-      final cached = _charactersBox.values
-          .map((e) => e.toCardModel())
-          .toList();
-
-      if (cached.isNotEmpty) {
-        emit(CharactersLoaded(
-          characters: cached,
-          favoriteIds: _favoritesBox.values.map((e) => e.id).toSet(),
-        ));
-      }
-
       final network = await _provider.fetchCharacters(page: 1);
 
-      final ui = network
+      final fresh = network
           .map((e) => CharacterCardModel(
                 id: e.id,
                 name: e.name,
@@ -58,18 +64,62 @@ class CharactersBloc extends Bloc<CharactersEvent, CharactersState> {
               ))
           .toList();
 
-      for (final c in ui) {
+      for (final c in fresh) {
         if (!_charactersBox.values.any((e) => e.id == c.id)) {
           _charactersBox.add(CharacterHiveModel.fromCardModel(c));
         }
       }
 
+      _currentPage = 1;
+      _hasMore = fresh.isNotEmpty;
+
       emit(CharactersLoaded(
-        characters: ui,
+        characters: fresh,
         favoriteIds: _favoritesBox.values.map((e) => e.id).toSet(),
+        hasMore: _hasMore,
       ));
-    } catch (e) {
-      emit(CharactersFailure(e));
+    } catch (_) {}
+  }
+
+  Future<void> _onLoadNextPage(
+      LoadNextPage event, Emitter<CharactersState> emit) async {
+    if (_isFetching || !_hasMore || state is! CharactersLoaded) return;
+
+    _isFetching = true;
+    final current = state as CharactersLoaded;
+
+    emit(current.copyWith(isPageLoading: true));
+
+    try {
+      final network = await _provider.fetchCharacters(page: _currentPage + 1);
+
+      final next = network
+          .map((e) => CharacterCardModel(
+                id: e.id,
+                name: e.name,
+                imageUrl: e.imageUrl,
+                location: e.location,
+                status: e.status,
+                species: e.species,
+              ))
+          .toList();
+
+      for (final c in next) {
+        if (!_charactersBox.values.any((e) => e.id == c.id)) {
+          _charactersBox.add(CharacterHiveModel.fromCardModel(c));
+        }
+      }
+
+      _currentPage++;
+      _hasMore = next.isNotEmpty;
+
+      emit(current.copyWith(
+        characters: [...current.characters, ...next],
+        hasMore: _hasMore,
+        isPageLoading: false,
+      ));
+    } finally {
+      _isFetching = false;
     }
   }
 
@@ -95,8 +145,7 @@ class CharactersBloc extends Bloc<CharactersEvent, CharactersState> {
       _RefreshFavorites event, Emitter<CharactersState> emit) {
     if (state is CharactersLoaded) {
       final s = state as CharactersLoaded;
-      emit(CharactersLoaded(
-        characters: s.characters,
+      emit(s.copyWith(
         favoriteIds: _favoritesBox.values.map((e) => e.id).toSet(),
       ));
     }
