@@ -106,14 +106,30 @@ https://rickandmortyapi.com/
 
 Подключить анализатор кода и автоформатирование
 
-## Превью
+## Превью часть 1
 
 https://github.com/user-attachments/assets/b8c8e4c5-29f4-43e1-bbfc-508645517d86
+
 ---
+
+## Превью часть 2
+
 https://github.com/user-attachments/assets/520e354d-7fdf-435e-916e-6a7f857b7742
+
 ---
+
+## Превью часть 3
+
 https://github.com/user-attachments/assets/23fec0bb-f619-452b-a885-81947d2d1c43
+
 ---
+
+## Превью часть 4
+
 https://github.com/user-attachments/assets/8351e6ca-6a87-4636-a76e-6b369d4f9de6
+
 ---
+
+## Превью часть 5
+
 https://github.com/user-attachments/assets/fe4d4f1b-b657-40b4-b4b1-259686f2af8d
